@@ -63,12 +63,7 @@ class Product < ApplicationRecord
     BarcodeService.generate_adhesive_label_barcode(self)
   end
 
-  def generate_barcode_pdf
-    # Format: barcode only (for scanning)
-    barcode_text = self.barcode
-    barcode = Barby::Code128.new(barcode_text)
-    barcode.to_pdf(height: 60, margin: 10)
-  end
+
 
   private
 

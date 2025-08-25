@@ -2,7 +2,6 @@ class BarcodeService
   require "barby"
   require "barby/barcode/code_128"
   require "barby/outputter/png_outputter"
-  require "barby/outputter/prawn_outputter"
 
   def self.generate_barcode_png(barcode_text, height: 50, margin: 5)
     barcode = Barby::Code128.new(barcode_text)
@@ -33,10 +32,7 @@ class BarcodeService
     barcode.to_png(height: height, margin: margin)
   end
 
-  def self.generate_barcode_pdf(barcode_text, height: 50, margin: 5)
-    barcode = Barby::Code128.new(barcode_text)
-    barcode.to_pdf(height: height, margin: margin)
-  end
+
 
   def self.generate_barcode_svg(barcode_text, height: 50, margin: 5)
     barcode = Barby::Code128.new(barcode_text)
