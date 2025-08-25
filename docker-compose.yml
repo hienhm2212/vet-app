@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # Rails Application
+  web:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      - RAILS_ENV=development
+      - DATABASE_URL=sqlite3:db/development.sqlite3
+      - RAILS_SERVE_STATIC_FILES=true
+      - RAILS_LOG_TO_STDOUT=true
+    volumes:
+      - .:/app
+      - bundle_cache:/usr/local/bundle
+      - node_modules:/app/node_modules
+    depends_on:
+      - sqlite3
+    command: bundle exec rails server -b 0.0.0.0
+    restart: unless-stopped
+
+  # SQLite Database (for development)
+  sqlite3:
+    image: alpine/sqlite3
+    volumes:
+      - sqlite_data:/data
+    command: sqlite3 /data/development.sqlite3
+    restart: unless-stopped
+
+  # Redis (for caching and background jobs)
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  # Sidekiq (background job processor)
+  sidekiq:
+    build: .
+    environment:
+      - RAILS_ENV=development
+      - DATABASE_URL=sqlite3:db/development.sqlite3
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - .:/app
+      - bundle_cache:/usr/local/bundle
+    depends_on:
+      - web
+      - redis
+    command: bundle exec sidekiq
+    restart: unless-stopped
+
+volumes:
+  sqlite_data:
+  redis_data:
+  bundle_cache:
+  node_modules:

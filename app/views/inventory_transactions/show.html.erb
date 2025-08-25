@@ -1,0 +1,96 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to 'Tồn kho', inventory_transactions_path %></li>
+          <li class="breadcrumb-item active">Chi tiết giao dịch</li>
+        </ol>
+      </nav>
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Chi tiết Giao dịch Tồn kho</h1>
+        <%= link_to 'Quay lại', inventory_transactions_path, class: 'btn btn-secondary' %>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Thông tin Giao dịch</h5>
+            </div>
+            <div class="card-body">
+              <table class="table table-borderless">
+                <tr>
+                  <td><strong>ID Giao dịch:</strong></td>
+                  <td><%= @inventory_transaction.id %></td>
+                </tr>
+                <tr>
+                  <td><strong>Ngày tạo:</strong></td>
+                  <td><%= format_datetime_vn(@inventory_transaction.created_at) %></td>
+                </tr>
+                <tr>
+                  <td><strong>Loại giao dịch:</strong></td>
+                  <td>
+                    <span class="<%= @inventory_transaction.transaction_type == 'IN' ? 'badge bg-success' : 'badge bg-danger' %>">
+                      <%= @inventory_transaction.display_type %>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Số lượng:</strong></td>
+                  <td><strong><%= @inventory_transaction.quantity %></strong></td>
+                </tr>
+                <tr>
+                  <td><strong>Nguồn gốc:</strong></td>
+                  <td><%= @inventory_transaction.source %></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <div class="card">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Thông tin Sản phẩm</h5>
+            </div>
+            <div class="card-body">
+              <table class="table table-borderless">
+                <tr>
+                  <td><strong>Tên sản phẩm:</strong></td>
+                  <td><%= @inventory_transaction.product.name %></td>
+                </tr>
+                <tr>
+                  <td><strong>Danh mục:</strong></td>
+                  <td><%= @inventory_transaction.product.category %></td>
+                </tr>
+                <tr>
+                  <td><strong>Mã vạch:</strong></td>
+                  <td><%= @inventory_transaction.product.barcode %></td>
+                </tr>
+                <tr>
+                  <td><strong>Giá:</strong></td>
+                  <td><%= format_vnd(@inventory_transaction.product.price) %></td>
+                </tr>
+                <tr>
+                  <td><strong>Tồn kho hiện tại:</strong></td>
+                  <td>
+                    <span class="<%= stock_status_class(@inventory_transaction.product) %>">
+                      <%= @inventory_transaction.product.stock %>
+                    </span>
+                  </td>
+                </tr>
+                <tr>
+                  <td><strong>Nhà cung cấp:</strong></td>
+                  <td><%= @inventory_transaction.product.supplier %></td>
+                </tr>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

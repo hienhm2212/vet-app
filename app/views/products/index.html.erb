@@ -1,0 +1,291 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- Page header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="mb-1">
+            <i class="bi bi-box-seam text-primary me-2"></i>
+            Sản phẩm
+          </h2>
+          <p class="text-muted mb-0">Quản lý sản phẩm và tồn kho</p>
+        </div>
+        <%= link_to new_product_path, class: 'btn btn-primary' do %>
+          <i class="bi bi-plus-circle me-2"></i>
+          Thêm sản phẩm mới
+        <% end %>
+      </div>
+
+      <!-- Enhanced Search and Filters -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white border-0">
+          <h6 class="card-title mb-0">
+            <i class="bi bi-funnel text-primary me-2"></i>
+            Tìm kiếm và Lọc sản phẩm
+          </h6>
+        </div>
+        <div class="card-body">
+          <%= form_with url: products_path, method: :get, local: true do |form| %>
+            <!-- Search Row -->
+            <div class="row g-3 mb-3">
+              <div class="col-md-8">
+                <div class="input-group">
+                  <span class="input-group-text">
+                    <i class="bi bi-search"></i>
+                  </span>
+                  <%= form.text_field :search, value: params[:search], 
+                      placeholder: 'Tìm kiếm theo tên, danh mục hoặc nhà cung cấp...', 
+                      class: 'form-control' %>
+                  <%= form.submit 'Tìm kiếm', class: 'btn btn-primary' %>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="d-flex gap-2">
+                  <%= link_to 'Xóa bộ lọc', products_path, class: 'btn btn-outline-secondary btn-sm' %>
+                  <button type="button" class="btn btn-outline-info btn-sm" data-bs-toggle="collapse" data-bs-target="#advancedFilters">
+                    <i class="bi bi-sliders me-1"></i>
+                    Bộ lọc nâng cao
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Advanced Filters -->
+            <div class="collapse <%= 'show' if params[:category].present? || params[:product_type].present? || params[:stock_status].present? || params[:price_min].present? || params[:price_max].present? %>" id="advancedFilters">
+              <div class="row g-3">
+                <!-- Category and Product Type -->
+                <div class="col-md-3">
+                  <label class="form-label">Danh mục</label>
+                  <%= form.select :category, 
+                      options_for_select([['Tất cả danh mục', '']] + @categories.map { |c| [c, c] }, params[:category]), 
+                      {}, { class: 'form-select' } %>
+                </div>
+                
+                <div class="col-md-3">
+                  <label class="form-label">Loại sản phẩm</label>
+                  <%= form.select :product_type, 
+                      options_for_select([['Tất cả loại', '']] + @product_types.map { |t| [t, t] }, params[:product_type]), 
+                      {}, { class: 'form-select' } %>
+                </div>
+
+                <!-- Stock Status -->
+                <div class="col-md-3">
+                  <label class="form-label">Trạng thái tồn kho</label>
+                  <%= form.select :stock_status, 
+                      options_for_select([
+                        ['Tất cả', ''],
+                        ['Còn hàng', 'in_stock'],
+                        ['Tồn kho thấp', 'low_stock'],
+                        ['Hết hàng', 'out_of_stock']
+                      ], params[:stock_status]), 
+                      {}, { class: 'form-select' } %>
+                </div>
+
+                <!-- Sort -->
+                <div class="col-md-3">
+                  <label class="form-label">Sắp xếp theo</label>
+                  <%= form.select :sort, 
+                      options_for_select([
+                        ['Tên A-Z', 'name'],
+                        ['Giá thấp-cao', 'price_low'],
+                        ['Giá cao-thấp', 'price_high'],
+                        ['Tồn kho thấp-cao', 'stock_low'],
+                        ['Tồn kho cao-thấp', 'stock_high'],
+                        ['Mới nhất', 'newest']
+                      ], params[:sort]), 
+                      {}, { class: 'form-select' } %>
+                </div>
+
+                <!-- Price Range -->
+                <div class="col-md-6">
+                  <label class="form-label">Khoảng giá (VND)</label>
+                  <div class="row g-2">
+                    <div class="col-6">
+                      <%= form.number_field :price_min, value: params[:price_min], 
+                          placeholder: 'Từ', 
+                          class: 'form-control', 
+                          min: 0 %>
+                    </div>
+                    <div class="col-6">
+                      <%= form.number_field :price_max, value: params[:price_max], 
+                          placeholder: 'Đến', 
+                          class: 'form-control', 
+                          min: 0 %>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Apply Filters Button -->
+                <div class="col-md-6 d-flex align-items-end">
+                  <%= form.submit 'Áp dụng bộ lọc', class: 'btn btn-primary me-2' %>
+                  <%= link_to 'Xóa bộ lọc', products_path, class: 'btn btn-outline-secondary' %>
+                </div>
+              </div>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Results Summary -->
+      <% if params[:search].present? || params[:category].present? || params[:product_type].present? || params[:stock_status].present? || params[:price_min].present? || params[:price_max].present? %>
+        <div class="alert alert-info d-flex justify-content-between align-items-center mb-4">
+          <div>
+            <i class="bi bi-info-circle me-2"></i>
+            <strong>Kết quả tìm kiếm:</strong> 
+            Tìm thấy <%= @products.count %> sản phẩm
+            <% if params[:search].present? %>
+              cho "<%= params[:search] %>"
+            <% end %>
+            <% if params[:category].present? %>
+              trong danh mục "<%= params[:category] %>"
+            <% end %>
+            <% if params[:product_type].present? %>
+              loại "<%= params[:product_type] %>"
+            <% end %>
+            <% if params[:stock_status].present? %>
+              <% stock_status_text = case params[:stock_status]
+                 when 'in_stock' then 'còn hàng'
+                 when 'low_stock' then 'tồn kho thấp'
+                 when 'out_of_stock' then 'hết hàng'
+                 end %>
+              trạng thái "<%= stock_status_text %>"
+            <% end %>
+            <% if params[:price_min].present? || params[:price_max].present? %>
+              giá từ <%= format_vnd(params[:price_min].to_i) if params[:price_min].present? %> 
+              đến <%= format_vnd(params[:price_max].to_i) if params[:price_max].present? %>
+            <% end %>
+          </div>
+          <%= link_to 'Xóa bộ lọc', products_path, class: 'btn btn-outline-info btn-sm' %>
+        </div>
+      <% end %>
+
+      <% if @products.any? %>
+        <div class="card shadow-sm">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th class="border-0">
+                      <i class="bi bi-box me-1"></i>
+                      Sản phẩm
+                    </th>
+                    <th class="border-0">
+                      <i class="bi bi-tags me-1"></i>
+                      Danh mục
+                    </th>
+                    <th class="border-0">
+                      <i class="bi bi-box me-1"></i>
+                      Loại
+                    </th>
+                    <th class="border-0">
+                      <i class="bi bi-currency-dollar me-1"></i>
+                      Giá
+                    </th>
+                    <th class="border-0">
+                      <i class="bi bi-boxes me-1"></i>
+                      Tồn kho
+                    </th>
+                    <th class="border-0">
+                      <i class="bi bi-building me-1"></i>
+                      Nhà cung cấp
+                    </th>
+                    <th class="border-0">
+                      <i class="bi bi-upc-scan me-1"></i>
+                      Mã vạch
+                    </th>
+                    <th class="border-0 text-center">
+                      <i class="bi bi-gear me-1"></i>
+                      Thao tác
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @products.each do |product| %>
+                    <tr class="align-middle">
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="flex-shrink-0">
+                            <div class="bg-primary bg-opacity-10 rounded p-2">
+                              <i class="bi bi-box text-primary"></i>
+                            </div>
+                          </div>
+                          <div class="flex-grow-1 ms-3">
+                            <h6 class="mb-0"><%= product.name %></h6>
+                            <small class="text-muted">ID: <%= product.id %></small>
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        <span class="badge bg-info bg-opacity-75"><%= product.category %></span>
+                      </td>
+                      <td>
+                        <span class="badge bg-secondary bg-opacity-75"><%= product.product_type %></span>
+                      </td>
+                      <td>
+                        <span class="fw-bold text-success"><%= format_vnd(product.price) %></span>
+                      </td>
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <span class="<%= stock_status_class(product) %> fw-bold me-2">
+                            <%= product.stock %>
+                          </span>
+                          <% if product.low_stock? %>
+                            <span class="badge bg-warning">Thấp</span>
+                          <% elsif !product.available? %>
+                            <span class="badge bg-danger">Hết</span>
+                          <% else %>
+                            <span class="badge bg-success">OK</span>
+                          <% end %>
+                        </div>
+                      </td>
+                      <td>
+                        <small class="text-muted"><%= product.supplier || 'N/A' %></small>
+                      </td>
+                      <td>
+                        <code class="small"><%= product.barcode %></code>
+                      </td>
+                      <td>
+                        <div class="btn-group" role="group">
+                          <%= link_to product_path(product), class: 'btn btn-sm btn-outline-primary', title: 'Xem chi tiết' do %>
+                            <i class="bi bi-eye"></i>
+                          <% end %>
+                          <%= link_to edit_product_path(product), class: 'btn btn-sm btn-outline-warning', title: 'Sửa' do %>
+                            <i class="bi bi-pencil"></i>
+                          <% end %>
+                          <%= link_to barcode_product_path(product), class: 'btn btn-sm btn-outline-info', target: '_blank', title: 'In nhãn dán' do %>
+                            <i class="bi bi-printer"></i>
+                          <% end %>
+                          <%= link_to product_path(product), 
+                              method: :delete, 
+                              data: { confirm: 'Bạn có chắc chắn muốn xóa sản phẩm này?' },
+                              class: 'btn btn-sm btn-outline-danger', title: 'Xóa' do %>
+                            <i class="bi bi-trash"></i>
+                          <% end %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      <% else %>
+        <div class="card shadow-sm">
+          <div class="card-body text-center py-5">
+            <div class="mb-4">
+              <i class="bi bi-box-seam text-muted" style="font-size: 4rem;"></i>
+            </div>
+            <h4 class="text-muted mb-3">Chưa có sản phẩm nào</h4>
+            <p class="text-muted mb-4">Hãy thêm sản phẩm đầu tiên để bắt đầu quản lý kho.</p>
+            <%= link_to new_product_path, class: 'btn btn-primary btn-lg' do %>
+              <i class="bi bi-plus-circle me-2"></i>
+              Thêm sản phẩm đầu tiên
+            <% end %>
+          </div>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>

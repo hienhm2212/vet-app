@@ -1,0 +1,103 @@
+# Name of your application. Used to uniquely configure containers.
+service: vet-app
+
+# Name of the container image.
+image: your-registry/vet-app
+
+# Defaults for all servers
+defaults:
+  user: deploy
+  registry:
+    username:
+      - KAMAL_REGISTRY_USERNAME
+    password:
+      - KAMAL_REGISTRY_PASSWORD
+
+# Define your servers
+servers:
+  web:
+    hosts:
+      - 192.168.0.1
+    labels:
+      traefik.http.routers.vet-app.rule: Host(`vet-app.example.com`)
+      traefik.http.services.vet-app.loadbalancer.server.port: 3000
+
+# Define your accessories (databases, redis, etc.)
+accessories:
+  db:
+    image: postgres:15
+    host: 192.168.0.2
+    port: 5432
+    env:
+      clear:
+        POSTGRES_DB: vet_app_production
+        POSTGRES_USER: vet_app
+      secret:
+        - POSTGRES_PASSWORD
+    volumes:
+      - /var/lib/postgresql/data:/var/lib/postgresql/data
+    directories:
+      - /var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    host: 192.168.0.3
+    port: 6379
+    volumes:
+      - /var/lib/redis/data:/data
+    directories:
+      - /var/lib/redis/data
+
+# Environment variables
+env:
+  clear:
+    RAILS_ENV: production
+    RAILS_SERVE_STATIC_FILES: true
+    RAILS_LOG_TO_STDOUT: true
+    DATABASE_URL: postgresql://vet_app:${POSTGRES_PASSWORD}@${db.host}:${db.port}/vet_app_production
+    REDIS_URL: redis://${redis.host}:${redis.port}/0
+  secret:
+    - RAILS_MASTER_KEY
+    - POSTGRES_PASSWORD
+
+# Health check
+healthcheck:
+  path: /health
+  port: 3000
+  max_attempts: 10
+  interval: 30s
+
+# Rolling updates
+rolling:
+  max_unavailable: 1
+  max_surge: 1
+
+# Resource limits
+resources:
+  cpu: 0.5
+  memory: 512Mi
+  limits:
+    cpu: 1.0
+    memory: 1Gi
+
+# Volumes for persistent data
+volumes:
+  - /var/lib/vet-app/storage:/app/storage
+  - /var/lib/vet-app/logs:/app/log
+
+# Commands to run before deployment
+before_deploy:
+  - echo "Running pre-deployment checks..."
+
+# Commands to run after deployment
+after_deploy:
+  - echo "Running post-deployment tasks..."
+  - bundle exec rails db:migrate
+  - bundle exec rails assets:precompile
+
+# Backup configuration
+backup:
+  database:
+    command: pg_dump $DATABASE_URL > backup.sql
+    path: /var/backups/vet-app
+    retention: 7

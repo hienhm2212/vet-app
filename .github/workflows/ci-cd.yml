@@ -1,0 +1,228 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  RAILS_ENV: test
+  DATABASE_URL: sqlite3:db/test.sqlite3
+
+jobs:
+  # Test and Lint Job
+  test-and-lint:
+    runs-on: ubuntu-latest
+    
+    services:
+      sqlite3:
+        image: alpine/sqlite3
+        options: >-
+          --health-cmd "sqlite3 --version"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.4.5'
+        bundler-cache: true
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y sqlite3 libsqlite3-dev
+
+    - name: Install Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+
+    - name: Install JavaScript dependencies
+      run: npm ci
+
+    - name: Setup database
+      run: |
+        bundle exec rails db:create
+        bundle exec rails db:schema:load
+        bundle exec rails db:seed
+
+    - name: Run RuboCop
+      run: bundle exec rubocop --parallel
+
+    - name: Run Brakeman security check
+      run: bundle exec brakeman --no-progress --output-format json --output brakeman-report.json
+      continue-on-error: true
+
+    - name: Run tests
+      run: bundle exec rails test
+
+    - name: Run system tests
+      run: bundle exec rails test:system
+      continue-on-error: true
+
+    - name: Upload test coverage
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: test-results
+        path: |
+          coverage/
+          brakeman-report.json
+        retention-days: 30
+
+  # Security and Quality Checks
+  security-checks:
+    runs-on: ubuntu-latest
+    needs: test-and-lint
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.4.5'
+        bundler-cache: true
+
+    - name: Run Bundle Audit
+      run: bundle exec bundle-audit check --update
+
+    - name: Run Yarn Audit
+      run: yarn audit --level moderate
+      continue-on-error: true
+
+    - name: Run Brakeman Security Scan
+      run: bundle exec brakeman --no-progress --output-format json --output brakeman-report.json
+
+    - name: Upload security reports
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: security-reports
+        path: brakeman-report.json
+        retention-days: 90
+
+  # Build and Package
+  build:
+    runs-on: ubuntu-latest
+    needs: [test-and-lint, security-checks]
+    if: github.ref == 'refs/heads/main'
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.4.5'
+        bundler-cache: true
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y sqlite3 libsqlite3-dev
+
+    - name: Setup production database
+      env:
+        RAILS_ENV: production
+        DATABASE_URL: sqlite3:db/production.sqlite3
+      run: |
+        bundle exec rails db:create
+        bundle exec rails db:schema:load
+
+    - name: Precompile assets
+      env:
+        RAILS_ENV: production
+        RAILS_SERVE_STATIC_FILES: true
+        RAILS_LOG_TO_STDOUT: true
+      run: bundle exec rails assets:precompile
+
+    - name: Create deployment package
+      run: |
+        tar -czf vet-app-$(date +%Y%m%d-%H%M%S).tar.gz \
+          --exclude='.git' \
+          --exclude='node_modules' \
+          --exclude='tmp' \
+          --exclude='log' \
+          --exclude='coverage' \
+          .
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: deployment-package
+        path: vet-app-*.tar.gz
+        retention-days: 30
+
+  # Deploy to Staging (for develop branch)
+  deploy-staging:
+    runs-on: ubuntu-latest
+    needs: [test-and-lint, security-checks]
+    if: github.ref == 'refs/heads/develop'
+    environment: staging
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Deploy to staging
+      run: |
+        echo "Deploying to staging environment..."
+        # Add your staging deployment commands here
+        # Example: Deploy to Heroku staging app
+        # heroku container:push web -a your-staging-app
+        # heroku container:release web -a your-staging-app
+
+  # Deploy to Production (for main branch)
+  deploy-production:
+    runs-on: ubuntu-latest
+    needs: [test-and-lint, security-checks, build]
+    if: github.ref == 'refs/heads/main'
+    environment: production
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v4
+      with:
+        name: deployment-package
+        path: ./artifacts
+
+    - name: Deploy to production
+      run: |
+        echo "Deploying to production environment..."
+        # Add your production deployment commands here
+        # Example: Deploy to Heroku production app
+        # heroku container:push web -a your-production-app
+        # heroku container:release web -a your-production-app
+
+  # Notifications
+  notify:
+    runs-on: ubuntu-latest
+    needs: [test-and-lint, security-checks, build, deploy-production]
+    if: always()
+
+    steps:
+    - name: Notify on success
+      if: needs.test-and-lint.result == 'success' && needs.security-checks.result == 'success'
+      run: |
+        echo "✅ All checks passed successfully!"
+        # Add notification logic here (Slack, email, etc.)
+
+    - name: Notify on failure
+      if: needs.test-and-lint.result == 'failure' || needs.security-checks.result == 'failure'
+      run: |
+        echo "❌ Some checks failed. Please review the logs."
+        # Add failure notification logic here

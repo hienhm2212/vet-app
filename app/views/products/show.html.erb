@@ -1,0 +1,219 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to 'Sản phẩm', products_path %></li>
+          <li class="breadcrumb-item active"><%= @product.name %></li>
+        </ol>
+      </nav>
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="display-6">Chi tiết Sản phẩm</h1>
+        <div class="btn-group" role="group">
+          <%= link_to 'Sửa', edit_product_path(@product), class: 'btn btn-warning' %>
+          <%= link_to 'Quay lại', products_path, class: 'btn btn-secondary' %>
+        </div>
+      </div>
+
+      <div class="row">
+        <!-- Product Information -->
+        <div class="col-lg-8">
+          <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+              <h5 class="card-title mb-0">
+                <i class="bi bi-box-seam me-2"></i>
+                Thông tin Sản phẩm
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <table class="table table-borderless">
+                    <tr>
+                      <td class="fw-bold text-muted">Tên sản phẩm:</td>
+                      <td class="fs-5"><%= @product.name %></td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold text-muted">Danh mục:</td>
+                      <td>
+                        <span class="badge bg-info"><%= @product.category %></span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold text-muted">Loại đơn vị:</td>
+                      <td>
+                        <span class="badge bg-secondary"><%= @product.product_type %></span>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold text-muted">Giá:</td>
+                      <td class="fs-4 text-success fw-bold"><%= format_vnd(@product.price) %></td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold text-muted">Nhà cung cấp:</td>
+                      <td><%= @product.supplier || 'Chưa cập nhật' %></td>
+                    </tr>
+                  </table>
+                </div>
+                <div class="col-md-6">
+                  <table class="table table-borderless">
+                    <tr>
+                      <td class="fw-bold text-muted">Mã vạch:</td>
+                      <td>
+                        <code class="fs-6"><%= @product.barcode %></code>
+                                                 <%= link_to 'In nhãn dán', barcode_product_path(@product), 
+                             class: 'btn btn-sm btn-outline-primary ms-2', target: '_blank' %>
+                         <%= link_to 'Test mã vạch', barcode_test_product_path(@product), 
+                             class: 'btn btn-sm btn-outline-secondary ms-2', target: '_blank' %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold text-muted">Tồn kho:</td>
+                      <td>
+                        <span class="<%= stock_status_class(@product) %> fs-5 fw-bold">
+                          <%= @product.stock %> đơn vị
+                        </span>
+                        <% if @product.low_stock? %>
+                          <span class="badge bg-warning ms-2">Tồn kho thấp</span>
+                        <% end %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold text-muted">Trạng thái:</td>
+                      <td>
+                        <% if @product.available? %>
+                          <span class="badge bg-success">Có sẵn</span>
+                        <% else %>
+                          <span class="badge bg-danger">Hết hàng</span>
+                        <% end %>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="fw-bold text-muted">Ngày tạo:</td>
+                      <td><%= format_datetime_vn(@product.created_at) %></td>
+                    </tr>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Stock Alerts -->
+          <% if @product.low_stock? %>
+            <div class="alert alert-warning alert-dismissible fade show mt-3" role="alert">
+              <i class="bi bi-exclamation-triangle me-2"></i>
+              <strong>Cảnh báo:</strong> Sản phẩm này có tồn kho thấp (<%= @product.stock %> đơn vị). 
+              Vui lòng nhập thêm hàng.
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          <% end %>
+
+          <% unless @product.available? %>
+            <div class="alert alert-danger alert-dismissible fade show mt-3" role="alert">
+              <i class="bi bi-x-circle me-2"></i>
+              <strong>Hết hàng:</strong> Sản phẩm này hiện không có sẵn trong kho.
+              <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+          <% end %>
+        </div>
+
+        <!-- Quick Actions & Stats -->
+        <div class="col-lg-4">
+          <!-- Quick Actions -->
+          <div class="card shadow-sm mb-3">
+            <div class="card-header bg-success text-white">
+              <h6 class="card-title mb-0">
+                <i class="bi bi-lightning me-2"></i>
+                Thao tác nhanh
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="d-grid gap-2">
+                <%= link_to 'Sửa thông tin', edit_product_path(@product), class: 'btn btn-outline-primary' %>
+                <%= link_to 'In nhãn dán', barcode_product_path(@product), 
+                    class: 'btn btn-outline-info', target: '_blank' %>
+                <%= link_to 'Xem lịch sử giao dịch', '#', class: 'btn btn-outline-secondary' %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Statistics -->
+          <div class="card shadow-sm">
+            <div class="card-header bg-info text-white">
+              <h6 class="card-title mb-0">
+                <i class="bi bi-graph-up me-2"></i>
+                Thống kê
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="row text-center">
+                <div class="col-6">
+                  <div class="border rounded p-2">
+                    <h4 class="text-primary mb-0"><%= @product.inventory_transactions.count %></h4>
+                    <small class="text-muted">Giao dịch</small>
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="border rounded p-2">
+                    <h4 class="text-success mb-0"><%= @product.invoice_items.count %></h4>
+                    <small class="text-muted">Đã bán</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Recent Transactions -->
+      <div class="mt-4">
+        <div class="card shadow-sm">
+          <div class="card-header bg-secondary text-white">
+            <h5 class="card-title mb-0">
+              <i class="bi bi-clock-history me-2"></i>
+              Giao dịch gần đây
+            </h5>
+          </div>
+          <div class="card-body">
+            <% recent_transactions = @product.inventory_transactions.ordered.limit(5) %>
+            <% if recent_transactions.any? %>
+              <div class="table-responsive">
+                <table class="table table-hover">
+                  <thead class="table-light">
+                    <tr>
+                      <th>Ngày</th>
+                      <th>Loại</th>
+                      <th>Số lượng</th>
+                      <th>Nguồn gốc</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <% recent_transactions.each do |transaction| %>
+                      <tr>
+                        <td><%= format_datetime_vn(transaction.created_at) %></td>
+                        <td>
+                          <span class="<%= transaction.transaction_type == 'IN' ? 'badge bg-success' : 'badge bg-danger' %>">
+                            <%= transaction.display_type %>
+                          </span>
+                        </td>
+                        <td><strong><%= transaction.quantity %></strong></td>
+                        <td><%= transaction.source %></td>
+                      </tr>
+                    <% end %>
+                  </tbody>
+                </table>
+              </div>
+            <% else %>
+              <div class="text-center text-muted py-3">
+                <i class="bi bi-inbox fs-1"></i>
+                <p class="mt-2">Chưa có giao dịch nào</p>
+              </div>
+            <% end %>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

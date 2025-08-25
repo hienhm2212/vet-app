@@ -1,0 +1,105 @@
+<div class="container mt-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to 'Sản phẩm', products_path %></li>
+          <li class="breadcrumb-item active">Thêm mới</li>
+        </ol>
+      </nav>
+
+      <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+          <h4 class="card-title mb-0">
+            <i class="bi bi-plus-circle me-2"></i>
+            Thêm Sản phẩm mới
+          </h4>
+        </div>
+        <div class="card-body">
+          <%= form_with model: @product, local: true do |form| %>
+            <% if @product.errors.any? %>
+              <div class="alert alert-danger">
+                <h5>
+                  <i class="bi bi-exclamation-triangle me-2"></i>
+                  <%= pluralize(@product.errors.count, "lỗi") %> đã xảy ra:
+                </h5>
+                <ul class="mb-0">
+                  <% @product.errors.full_messages.each do |message| %>
+                    <li><%= message %></li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+
+            <div class="row g-3">
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <%= form.text_field :name, class: 'form-control', placeholder: 'Tên sản phẩm' %>
+                  <%= form.label :name, 'Tên sản phẩm' %>
+                </div>
+              </div>
+              
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <%= form.text_field :category, class: 'form-control', placeholder: 'Danh mục' %>
+                  <%= form.label :category, 'Danh mục' %>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <%= form.select :product_type, Product.available_types, {}, { class: 'form-control' } %>
+                  <%= form.label :product_type, 'Loại đơn vị' %>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <%= form.number_field :price, class: 'form-control', placeholder: 'Giá', step: '0.01', min: '0' %>
+                  <%= form.label :price, 'Giá (VND)' %>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <%= form.number_field :stock, class: 'form-control', placeholder: 'Tồn kho', min: '0' %>
+                  <%= form.label :stock, 'Tồn kho' %>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <%= form.text_field :supplier, class: 'form-control', placeholder: 'Nhà cung cấp' %>
+                  <%= form.label :supplier, 'Nhà cung cấp' %>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="form-floating">
+                  <%= form.text_field :barcode, class: 'form-control', placeholder: 'Mã vạch (để trống để tự động tạo)' %>
+                  <%= form.label :barcode, 'Mã vạch (tùy chọn)' %>
+                </div>
+                <small class="form-text text-muted">
+                  <i class="bi bi-info-circle me-1"></i>
+                  Để trống để hệ thống tự động tạo mã vạch
+                </small>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-between mt-4">
+              <%= link_to products_path, class: 'btn btn-secondary' do %>
+                <i class="bi bi-arrow-left me-2"></i>
+                Quay lại
+              <% end %>
+              <%= form.submit 'Tạo sản phẩm', class: 'btn btn-primary btn-lg' do %>
+                <i class="bi bi-check-circle me-2"></i>
+                Tạo sản phẩm
+              <% end %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

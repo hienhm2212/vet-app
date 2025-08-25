@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Mã vạch - <%= @product.name %></title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    /* Adhesive Label Style - Matching the image */
+    body {
+      font-family: 'Inter', 'Noto Sans', 'Segoe UI', 'Roboto', 'DejaVu Sans', Arial, sans-serif;
+      margin: 0;
+      padding: 10px;
+      background: white;
+    }
+    
+    /* Label grid container */
+    .labels-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 5px;
+      max-width: 100%;
+    }
+    
+    /* Individual label */
+    .label {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: center;
+      background: white;
+      min-height: 80px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      box-sizing: border-box;
+    }
+    
+    /* Product name at top */
+    .product-name {
+      font-size: 9px;
+      font-weight: bold;
+      color: #000;
+      line-height: 1.1;
+      margin-bottom: 4px;
+      word-wrap: break-word;
+    }
+    
+    /* Barcode section in middle */
+    .barcode-section {
+      margin: 4px 0;
+      flex-grow: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    
+    .barcode-image {
+      max-width: 100%;
+      height: auto;
+      margin: 0 auto;
+    }
+    
+    .barcode-number {
+      font-family: 'JetBrains Mono', 'Fira Code', 'Consolas', 'Monaco', 'Courier New', monospace;
+      font-size: 8px;
+      font-weight: bold;
+      margin-top: 2px;
+      letter-spacing: 0.5px;
+      color: #000;
+    }
+    
+    /* Price at bottom */
+    .product-price {
+      font-size: 10px;
+      font-weight: bold;
+      color: #000;
+      margin-top: 4px;
+    }
+    
+    /* Print button */
+    .print-button {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-size: 14px;
+      font-family: 'Inter', 'Noto Sans', 'Segoe UI', 'Roboto', 'DejaVu Sans', Arial, sans-serif;
+      z-index: 1000;
+    }
+    
+    .print-button:hover {
+      background: #0056b3;
+    }
+    
+    /* Print styles */
+    @media print {
+      body {
+        margin: 0;
+        padding: 0;
+        background: white;
+      }
+      
+      .print-button {
+        display: none;
+      }
+      
+      .labels-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2px;
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+      
+      .label {
+        border: 1px solid #000;
+        padding: 4px;
+        page-break-inside: avoid;
+        break-inside: avoid;
+        background: white;
+        min-height: 70px;
+      }
+      
+      .barcode-image img {
+        max-width: 100% !important;
+        height: auto !important;
+        image-rendering: pixelated;
+        image-rendering: -moz-crisp-edges;
+        image-rendering: crisp-edges;
+      }
+      
+      .barcode-number {
+        font-size: 7px !important;
+        font-weight: bold !important;
+        letter-spacing: 0.5px !important;
+        color: #000 !important;
+      }
+      
+      .product-name {
+        font-size: 8px !important;
+        font-weight: bold !important;
+        color: #000 !important;
+      }
+      
+      .product-price {
+        font-size: 9px !important;
+        font-weight: bold !important;
+        color: #000 !important;
+      }
+      
+      /* Ensure proper thermal printing */
+      * {
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+      }
+    }
+    
+    /* Web preview styles */
+    @media screen {
+      body {
+        background: #f5f5f5;
+      }
+      
+      .labels-grid {
+        max-width: 400px;
+        margin: 0 auto;
+      }
+      
+      .label {
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        border-radius: 3px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <button class="print-button" onclick="window.print()">
+    🖨️ In nhãn dán
+  </button>
+
+  <div class="labels-grid">
+    <!-- Generate 16 labels (8x2 grid like the image) -->
+    <% 16.times do %>
+      <div class="label">
+        <!-- Product Name at Top -->
+        <div class="product-name">
+          <%= @product.name %>
+        </div>
+        
+        <!-- Barcode in Middle -->
+        <div class="barcode-section">
+          <div class="barcode-image">
+            <%= image_tag barcode_product_path(@product), alt: "Barcode: #{@product.barcode}", style: "max-width: 100%; height: auto;" %>
+          </div>
+          <div class="barcode-number">
+            <%= @product.barcode %>
+          </div>
+        </div>
+        
+        <!-- Price at Bottom -->
+        <div class="product-price">
+          <%= format_vnd(@product.price) %> / <%= @product.product_type %>
+        </div>
+      </div>
+    <% end %>
+  </div>
+
+  <script>
+    // Ensure proper printing for adhesive labels
+    window.addEventListener('beforeprint', function() {
+      // Set print-specific styles
+      document.body.style.background = 'white';
+    });
+  </script>
+</body>
+</html>

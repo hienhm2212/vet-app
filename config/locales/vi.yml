@@ -1,0 +1,170 @@
+vi:
+  # Model names
+  models:
+    owner: "Chủ nuôi"
+    patient: "Bệnh nhân"
+    product: "Sản phẩm"
+    inventory_transaction: "Giao dịch tồn kho"
+    appointment: "Lịch hẹn"
+    invoice: "Hóa đơn"
+    invoice_item: "Mục hóa đơn"
+
+  # Attributes
+  attributes:
+    owner:
+      name: "Tên"
+      phone: "Số điện thoại"
+      email: "Email"
+      created_at: "Ngày tạo"
+      updated_at: "Ngày cập nhật"
+    patient:
+      name: "Tên"
+      species: "Loài"
+      breed: "Giống"
+      gender: "Giới tính"
+      age: "Tuổi"
+      weight: "Cân nặng"
+      notes: "Ghi chú"
+      owner: "Chủ nuôi"
+      created_at: "Ngày tạo"
+      updated_at: "Ngày cập nhật"
+    product:
+      name: "Tên"
+      category: "Danh mục"
+      price: "Giá"
+      stock: "Tồn kho"
+      supplier: "Nhà cung cấp"
+      barcode: "Mã vạch"
+      created_at: "Ngày tạo"
+      updated_at: "Ngày cập nhật"
+    inventory_transaction:
+      product: "Sản phẩm"
+      quantity: "Số lượng"
+      transaction_type: "Loại giao dịch"
+      source: "Nguồn gốc"
+      created_at: "Ngày tạo"
+    appointment:
+      patient: "Bệnh nhân"
+      veterinarian_name: "Tên bác sĩ thú y"
+      scheduled_at: "Ngày giờ"
+      appointment_type: "Loại"
+      status: "Trạng thái"
+      created_at: "Ngày tạo"
+      updated_at: "Ngày cập nhật"
+    invoice:
+      appointment: "Lịch hẹn"
+      total_amount: "Tổng tiền"
+      payment_status: "Trạng thái thanh toán"
+      created_at: "Ngày tạo"
+      updated_at: "Ngày cập nhật"
+    invoice_item:
+      invoice: "Hóa đơn"
+      product: "Sản phẩm"
+      quantity: "Số lượng"
+      price: "Giá"
+      created_at: "Ngày tạo"
+
+  # Enums
+  enums:
+    patient:
+      gender:
+        male: "Đực"
+        female: "Cái"
+    inventory_transaction:
+      transaction_type:
+        in: "Nhập"
+        out: "Xuất"
+    appointment:
+      status:
+        scheduled: "Đã lên lịch"
+        in_progress: "Đang khám"
+        completed: "Hoàn thành"
+        cancelled: "Đã hủy"
+      appointment_type:
+        consultation: "Tư vấn"
+        vaccination: "Tiêm chủng"
+        surgery: "Phẫu thuật"
+        checkup: "Khám bệnh"
+    invoice:
+      payment_status:
+        pending: "Chờ thanh toán"
+        paid: "Đã thanh toán"
+        cancelled: "Đã hủy"
+
+  # Validation messages
+  errors:
+    messages:
+      record_invalid: "Có lỗi xảy ra: %{errors}"
+      blank: "không được để trống"
+      too_short: "quá ngắn (tối thiểu %{count} ký tự)"
+      too_long: "quá dài (tối đa %{count} ký tự)"
+      not_a_number: "không phải là số"
+      greater_than: "phải lớn hơn %{count}"
+      greater_than_or_equal_to: "phải lớn hơn hoặc bằng %{count}"
+      less_than: "phải nhỏ hơn %{count}"
+      less_than_or_equal_to: "phải nhỏ hơn hoặc bằng %{count}"
+      taken: "đã được sử dụng"
+      invalid: "không hợp lệ"
+      confirmation: "không khớp với xác nhận"
+      accepted: "phải được chấp nhận"
+      present: "phải có mặt"
+      absence: "phải vắng mặt"
+      inclusion: "phải được bao gồm trong danh sách"
+      exclusion: "phải được loại trừ khỏi danh sách"
+      format: "có định dạng không hợp lệ"
+      uniqueness: "phải là duy nhất"
+
+  # Flash messages
+  flash:
+    owners:
+      created: "Chủ nuôi đã được tạo thành công."
+      updated: "Chủ nuôi đã được cập nhật thành công."
+      destroyed: "Chủ nuôi đã được xóa thành công."
+    patients:
+      created: "Bệnh nhân đã được tạo thành công."
+      updated: "Bệnh nhân đã được cập nhật thành công."
+      destroyed: "Bệnh nhân đã được xóa thành công."
+    products:
+      created: "Sản phẩm đã được tạo thành công."
+      updated: "Sản phẩm đã được cập nhật thành công."
+      destroyed: "Sản phẩm đã được xóa thành công."
+    appointments:
+      created: "Lịch hẹn đã được tạo thành công."
+      updated: "Lịch hẹn đã được cập nhật thành công."
+      destroyed: "Lịch hẹn đã được xóa thành công."
+    invoices:
+      created: "Hóa đơn đã được tạo thành công."
+      updated: "Hóa đơn đã được cập nhật thành công."
+      destroyed: "Hóa đơn đã được xóa thành công."
+      product_added: "Sản phẩm đã được thêm vào hóa đơn thành công."
+
+  # Common actions
+  actions:
+    new: "Tạo mới"
+    edit: "Chỉnh sửa"
+    show: "Xem chi tiết"
+    delete: "Xóa"
+    back: "Quay lại"
+    save: "Lưu"
+    cancel: "Hủy"
+    confirm: "Xác nhận"
+    search: "Tìm kiếm"
+    add_product: "Thêm sản phẩm"
+    scan_barcode: "Quét mã vạch"
+
+  # Common labels
+  labels:
+    total: "Tổng cộng"
+    quantity: "Số lượng"
+    price: "Giá"
+    status: "Trạng thái"
+    date: "Ngày"
+    time: "Thời gian"
+    notes: "Ghi chú"
+    actions: "Thao tác"
+    no_records: "Không có dữ liệu"
+    loading: "Đang tải..."
+    error: "Lỗi"
+    success: "Thành công"
+    warning: "Cảnh báo"
+    info: "Thông tin"
