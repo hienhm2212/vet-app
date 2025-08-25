@@ -13,6 +13,6 @@ class CreatePatients < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :patients, [:owner_id, :name]
+    add_index :patients, [ :owner_id, :name ]
   end
 end

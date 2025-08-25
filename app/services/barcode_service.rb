@@ -1,8 +1,8 @@
 class BarcodeService
-  require 'barby'
-  require 'barby/barcode/code_128'
-  require 'barby/outputter/png_outputter'
-  require 'barby/outputter/prawn_outputter'
+  require "barby"
+  require "barby/barcode/code_128"
+  require "barby/outputter/png_outputter"
+  require "barby/outputter/prawn_outputter"
 
   def self.generate_barcode_png(barcode_text, height: 50, margin: 5)
     barcode = Barby::Code128.new(barcode_text)
@@ -44,7 +44,7 @@ class BarcodeService
   end
 
   def self.generate_qr_code_png(text, size: 200)
-    require 'barby/barcode/qr_code'
+    require "barby/barcode/qr_code"
     barcode = Barby::QrCode.new(text)
     barcode.to_png(size: size)
   end
@@ -52,7 +52,7 @@ class BarcodeService
   def self.validate_barcode(barcode_text)
     return false if barcode_text.blank?
     return false if barcode_text.length < 8 || barcode_text.length > 20
-    
+
     # Check if barcode contains only alphanumeric characters
     barcode_text.match?(/\A[a-zA-Z0-9]+\z/)
   end
@@ -60,9 +60,9 @@ class BarcodeService
   def self.generate_unique_barcode(prefix: "VN")
     loop do
       # Generate a 10-digit random number
-      random_number = SecureRandom.random_number(10**10).to_s.rjust(10, '0')
+      random_number = SecureRandom.random_number(10**10).to_s.rjust(10, "0")
       barcode = "#{prefix}#{random_number}"
-      
+
       # Check if barcode already exists
       unless Product.exists?(barcode: barcode)
         return barcode

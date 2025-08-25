@@ -10,7 +10,7 @@ class CreateAppointments < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :appointments, [:patient_id, :scheduled_at]
+    add_index :appointments, [ :patient_id, :scheduled_at ]
     add_index :appointments, :scheduled_at
     add_index :appointments, :status
   end

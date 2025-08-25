@@ -9,7 +9,7 @@ class CreateInventoryTransactions < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :inventory_transactions, [:product_id, :created_at]
+    add_index :inventory_transactions, [ :product_id, :created_at ]
     add_index :inventory_transactions, :transaction_type
   end
 end

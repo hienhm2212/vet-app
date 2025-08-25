@@ -18,12 +18,12 @@ Rails.application.routes.draw do
           patch :complete
           patch :cancel
         end
-        
+
         # Invoices nested under appointments
         resources :invoices do
           member do
             post :add_product_by_barcode
-            delete :remove_product, to: 'invoices#remove_product'
+            delete :remove_product, to: "invoices#remove_product"
             patch :mark_as_paid
             patch :mark_as_cancelled
           end
@@ -35,11 +35,11 @@ Rails.application.routes.draw do
   # Products routes
   resources :products do
     member do
-      get :barcode, defaults: { format: 'html' }
+      get :barcode, defaults: { format: "html" }
       get :barcode_test
     end
   end
 
   # Inventory transactions routes
-  resources :inventory_transactions, only: [:index, :show]
+  resources :inventory_transactions, only: [ :index, :show ]
 end

@@ -6,7 +6,7 @@ class Product < ApplicationRecord
   # Validations
   validates :name, presence: true, length: { minimum: 2, maximum: 100 }
   validates :category, presence: true, length: { minimum: 2, maximum: 50 }
-  validates :product_type, presence: true, inclusion: { in: %w[Hộp Túi Bịch Cái Chai Lọ Gói Viên] }
+  validates :product_type, presence: true, inclusion: { in: %w[ Hộp Túi Bịch Cái Chai Lọ Gói Viên ] }
   validates :price, presence: true, numericality: { greater_than: 0 }
   validates :stock, presence: true, numericality: { greater_than_or_equal_to: 0 }
   validates :supplier, length: { maximum: 100 }
@@ -19,13 +19,13 @@ class Product < ApplicationRecord
   scope :ordered, -> { order(:name) }
   scope :by_category, ->(category) { where(category: category) }
   scope :by_type, ->(type) { where(product_type: type) }
-  scope :in_stock, -> { where('stock > 0') }
-  scope :low_stock, -> { where('stock <= 10') }
+  scope :in_stock, -> { where("stock > 0") }
+  scope :low_stock, -> { where("stock <= 10") }
   scope :search, ->(query) { where("name LIKE ? OR category LIKE ? OR supplier LIKE ?", "%#{query}%", "%#{query}%", "%#{query}%") }
 
   # Class methods
   def self.available_types
-    %w[Hộp Túi Bịch Cái Chai Lọ Gói Viên]
+    %w[ Hộp Túi Bịch Cái Chai Lọ Gói Viên ]
   end
 
   # Instance methods
@@ -39,9 +39,9 @@ class Product < ApplicationRecord
 
   def update_stock(quantity, transaction_type)
     case transaction_type
-    when 'IN'
+    when "IN"
       self.stock += quantity
-    when 'OUT'
+    when "OUT"
       if self.stock >= quantity
         self.stock -= quantity
       else
@@ -74,7 +74,7 @@ class Product < ApplicationRecord
 
   def generate_barcode
     return if barcode.present?
-    
+
     loop do
       # Generate a 12-digit barcode
       new_barcode = "VN#{SecureRandom.random_number(10**10).to_s.rjust(10, '0')}"

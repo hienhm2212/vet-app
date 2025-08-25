@@ -4,8 +4,8 @@ class Appointment < ApplicationRecord
   has_one :invoice, dependent: :destroy
 
   # Enums
-  enum :status, { scheduled: 'scheduled', in_progress: 'in_progress', completed: 'completed', cancelled: 'cancelled' }
-  enum :appointment_type, { consultation: 'consultation', vaccination: 'vaccination', surgery: 'surgery', checkup: 'checkup' }
+  enum :status, { scheduled: "scheduled", in_progress: "in_progress", completed: "completed", cancelled: "cancelled" }
+  enum :appointment_type, { consultation: "consultation", vaccination: "vaccination", surgery: "surgery", checkup: "checkup" }
 
   # Validations
   validates :veterinarian_name, presence: true, length: { minimum: 2, maximum: 100 }
@@ -19,7 +19,7 @@ class Appointment < ApplicationRecord
 
   # Scopes
   scope :ordered, -> { order(scheduled_at: :asc) }
-  scope :upcoming, -> { where('scheduled_at >= ?', Time.current).where(status: 'scheduled') }
+  scope :upcoming, -> { where("scheduled_at >= ?", Time.current).where(status: "scheduled") }
   scope :today, -> { where(scheduled_at: Time.current.beginning_of_day..Time.current.end_of_day) }
   scope :by_status, ->(status) { where(status: status) }
   scope :by_veterinarian, ->(name) { where(veterinarian_name: name) }
@@ -27,27 +27,27 @@ class Appointment < ApplicationRecord
   # Instance methods
   def display_status
     case status
-    when 'scheduled'
-      'Đã lên lịch'
-    when 'in_progress'
-      'Đang khám'
-    when 'completed'
-      'Hoàn thành'
-    when 'cancelled'
-      'Đã hủy'
+    when "scheduled"
+      "Đã lên lịch"
+    when "in_progress"
+      "Đang khám"
+    when "completed"
+      "Hoàn thành"
+    when "cancelled"
+      "Đã hủy"
     end
   end
 
   def display_type
     case appointment_type
-    when 'consultation'
-      'Tư vấn'
-    when 'vaccination'
-      'Tiêm chủng'
-    when 'surgery'
-      'Phẫu thuật'
-    when 'checkup'
-      'Khám bệnh'
+    when "consultation"
+      "Tư vấn"
+    when "vaccination"
+      "Tiêm chủng"
+    when "surgery"
+      "Phẫu thuật"
+    when "checkup"
+      "Khám bệnh"
     end
   end
 
@@ -68,6 +68,6 @@ class Appointment < ApplicationRecord
   end
 
   def create_invoice
-    create_invoice!(total_amount: 0.0, payment_status: 'pending')
+    create_invoice!(total_amount: 0.0, payment_status: "pending")
   end
 end

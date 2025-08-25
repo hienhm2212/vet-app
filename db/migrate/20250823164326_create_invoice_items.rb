@@ -9,6 +9,6 @@ class CreateInvoiceItems < ActiveRecord::Migration[8.0]
       t.timestamps
     end
 
-    add_index :invoice_items, [:invoice_id, :product_id]
+    add_index :invoice_items, [ :invoice_id, :product_id ]
   end
 end

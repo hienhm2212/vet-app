@@ -4,7 +4,7 @@ class Patient < ApplicationRecord
   has_many :appointments, dependent: :destroy
 
   # Enums
-  enum :gender, { male: 'male', female: 'female' }
+  enum :gender, { male: "male", female: "female" }
 
   # Validations
   validates :name, presence: true, length: { minimum: 1, maximum: 50 }

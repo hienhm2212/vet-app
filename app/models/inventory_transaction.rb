@@ -3,7 +3,7 @@ class InventoryTransaction < ApplicationRecord
   belongs_to :product
 
   # Enums
-  enum :transaction_type, { in: 'IN', out: 'OUT' }
+  enum :transaction_type, { in: "IN", out: "OUT" }
 
   # Validations
   validates :quantity, presence: true, numericality: { greater_than: 0 }
@@ -17,11 +17,11 @@ class InventoryTransaction < ApplicationRecord
   scope :ordered, -> { order(created_at: :desc) }
   scope :by_type, ->(type) { where(transaction_type: type) }
   scope :by_product, ->(product_id) { where(product_id: product_id) }
-  scope :recent, ->(days = 30) { where('created_at >= ?', days.days.ago) }
+  scope :recent, ->(days = 30) { where("created_at >= ?", days.days.ago) }
 
   # Instance methods
   def display_type
-    transaction_type == 'IN' ? 'Nhập kho' : 'Xuất kho'
+    transaction_type == "IN" ? "Nhập kho" : "Xuất kho"
   end
 
   private

@@ -5,7 +5,7 @@ class Invoice < ApplicationRecord
   has_many :products, through: :invoice_items
 
   # Enums
-  enum :payment_status, { pending: 'pending', paid: 'paid', cancelled: 'cancelled' }
+  enum :payment_status, { pending: "pending", paid: "paid", cancelled: "cancelled" }
 
   # Validations
   validates :total_amount, presence: true, numericality: { greater_than_or_equal_to: 0 }
@@ -17,19 +17,19 @@ class Invoice < ApplicationRecord
   # Scopes
   scope :ordered, -> { order(created_at: :desc) }
   scope :by_status, ->(status) { where(payment_status: status) }
-  scope :pending_payment, -> { where(payment_status: 'pending') }
-  scope :paid, -> { where(payment_status: 'paid') }
-  scope :recent, ->(days = 30) { where('created_at >= ?', days.days.ago) }
+  scope :pending_payment, -> { where(payment_status: "pending") }
+  scope :paid, -> { where(payment_status: "paid") }
+  scope :recent, ->(days = 30) { where("created_at >= ?", days.days.ago) }
 
   # Instance methods
   def display_status
     case payment_status
-    when 'pending'
-      'Chờ thanh toán'
-    when 'paid'
-      'Đã thanh toán'
-    when 'cancelled'
-      'Đã hủy'
+    when "pending"
+      "Chờ thanh toán"
+    when "paid"
+      "Đã thanh toán"
+    when "cancelled"
+      "Đã hủy"
     end
   end
 
@@ -59,7 +59,7 @@ class Invoice < ApplicationRecord
       InventoryTransaction.create!(
         product: product,
         quantity: quantity,
-        transaction_type: 'OUT',
+        transaction_type: "OUT",
         source: "Bán hàng - Hóa đơn #{id}"
       )
 
@@ -84,7 +84,7 @@ class Invoice < ApplicationRecord
       InventoryTransaction.create!(
         product: product,
         quantity: quantity,
-        transaction_type: 'IN',
+        transaction_type: "IN",
         source: "Hoàn trả - Hóa đơn #{id}"
       )
 
@@ -98,17 +98,17 @@ class Invoice < ApplicationRecord
   end
 
   def mark_as_paid
-    update!(payment_status: 'paid')
+    update!(payment_status: "paid")
   end
 
   def mark_as_cancelled
-    update!(payment_status: 'cancelled')
+    update!(payment_status: "cancelled")
   end
 
   private
 
   def update_total_amount
-    new_total = invoice_items.sum('quantity * price')
+    new_total = invoice_items.sum("quantity * price")
     update_column(:total_amount, new_total) if new_total != total_amount
   end
 end

@@ -4,9 +4,9 @@ class Owner < ApplicationRecord
 
   # Validations
   validates :name, presence: true, length: { minimum: 2, maximum: 100 }
-  validates :phone, presence: true, uniqueness: true, 
+  validates :phone, presence: true, uniqueness: true,
             format: { with: /\A(\+84|0)[0-9]{9,10}\z/, message: "phải có định dạng số điện thoại Việt Nam hợp lệ" }
-  validates :email, presence: true, uniqueness: true, 
+  validates :email, presence: true, uniqueness: true,
             format: { with: URI::MailTo::EMAIL_REGEXP, message: "không hợp lệ" }
 
   # Scopes

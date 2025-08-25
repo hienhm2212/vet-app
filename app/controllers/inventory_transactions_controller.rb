@@ -1,5 +1,5 @@
 class InventoryTransactionsController < ApplicationController
-  before_action :set_inventory_transaction, only: [:show]
+  before_action :set_inventory_transaction, only: [ :show ]
 
   # GET /inventory_transactions
   def index
