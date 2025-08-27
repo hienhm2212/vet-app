@@ -77,6 +77,6 @@ class AppointmentsController < ApplicationController
   end
 
   def appointment_params
-    params.require(:appointment).permit(:scheduled_at, :appointment_type, :notes, :status)
+    params.require(:appointment).permit(:veterinarian_name, :scheduled_at, :appointment_type, :notes, :status)
   end
 end

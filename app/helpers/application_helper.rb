@@ -16,6 +16,11 @@ module ApplicationHelper
     datetime.strftime("%d/%m/%Y %H:%M")
   end
 
+  # Format datetime (alias for format_datetime_vn)
+  def format_datetime(datetime)
+    format_datetime_vn(datetime)
+  end
+
   # Format time in Vietnamese
   def format_time_vn(time)
     return "" if time.blank?

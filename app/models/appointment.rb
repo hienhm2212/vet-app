@@ -1,7 +1,7 @@
 class Appointment < ApplicationRecord
   # Associations
   belongs_to :patient
-  has_one :invoice, dependent: :destroy
+  has_many :invoices, dependent: :destroy
 
   # Enums
   enum :status, { scheduled: "scheduled", in_progress: "in_progress", completed: "completed", cancelled: "cancelled" }
@@ -15,7 +15,7 @@ class Appointment < ApplicationRecord
   validate :scheduled_at_cannot_be_in_the_past, on: :create
 
   # Callbacks
-  after_create :create_invoice
+  # after_create :create_invoice  # Commented out since we now support multiple invoices
 
   # Scopes
   scope :ordered, -> { order(scheduled_at: :asc) }
@@ -65,9 +65,5 @@ class Appointment < ApplicationRecord
     if scheduled_at.present? && scheduled_at < Time.current
       errors.add(:scheduled_at, "không thể là thời gian trong quá khứ")
     end
-  end
-
-  def create_invoice
-    create_invoice!(total_amount: 0.0, payment_status: "pending")
   end
 end

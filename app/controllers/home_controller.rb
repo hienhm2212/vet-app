@@ -44,14 +44,21 @@ class HomeController < ApplicationController
 
       # Get top selling products (based on invoice items)
       @top_selling_products = Product.joins(:invoice_items)
+                                    .select("products.*, COALESCE(SUM(invoice_items.quantity), 0) as total_sold")
                                     .group("products.id")
-                                    .order("COUNT(invoice_items.id) DESC")
+                                    .order("total_sold DESC")
                                     .limit(5)
 
       # Get daily sales for the last 7 days
       @daily_sales = Invoice.where(created_at: 1.week.ago..Time.current)
                            .group("DATE(created_at)")
                            .sum(:total_amount) || {}
+
+      # Chart data for appointments by status
+      @appointments_by_status = Appointment.group(:status).count
+
+      # Chart data for products by category
+      @products_by_category = Product.group(:category).count
 
     rescue => e
       # Fallback values if any query fails
@@ -69,6 +76,8 @@ class HomeController < ApplicationController
       @recent_inventory_transactions = []
       @top_selling_products = []
       @daily_sales = {}
+      @appointments_by_status = {}
+      @products_by_category = {}
     end
   end
 end
