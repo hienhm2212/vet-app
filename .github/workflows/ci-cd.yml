@@ -40,7 +40,7 @@ jobs:
       run: bundle exec rubocop --parallel
 
     - name: Run Brakeman security check
-      run: bundle exec brakeman --no-progress --output-format json --output brakeman-report.json
+      run: bundle exec brakeman -f json -o brakeman-report.json --no-progress
       continue-on-error: true
 
     - name: Run tests
@@ -79,7 +79,7 @@ jobs:
       run: bundle exec bundle-audit check --update
 
     - name: Run Brakeman Security Scan
-      run: bundle exec brakeman --no-progress --output-format json --output brakeman-report.json
+      run: bundle exec brakeman -f json -o brakeman-report.json --no-progress
 
     - name: Upload security reports
       uses: actions/upload-artifact@v4
