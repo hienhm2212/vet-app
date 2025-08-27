@@ -1,0 +1,207 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- Page header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h2 class="mb-1">
+            <i class="bi bi-calendar-check text-primary me-2"></i>
+            Chi tiết lịch hẹn
+          </h2>
+          <p class="text-muted mb-0">
+            <%= @patient.name %> - <%= @patient.owner.name %>
+          </p>
+        </div>
+        <div class="btn-group" role="group">
+          <%= link_to edit_owner_patient_appointment_path(@patient.owner, @patient, @appointment), class: "btn btn-outline-primary" do %>
+            <i class="bi bi-pencil me-2"></i>
+            Sửa
+          <% end %>
+          <%= link_to owner_patient_appointment_path(@patient.owner, @patient, @appointment), 
+              method: :delete, 
+              data: { confirm: "Bạn có chắc chắn muốn xóa lịch hẹn này?" },
+              class: "btn btn-outline-danger" do %>
+            <i class="bi bi-trash me-2"></i>
+            Xóa
+          <% end %>
+        </div>
+      </div>
+
+
+
+      <!-- Appointment details -->
+      <div class="row">
+        <div class="col-md-8">
+          <div class="card shadow-sm">
+            <div class="card-header">
+              <h5 class="card-title mb-0">
+                <i class="bi bi-info-circle me-2"></i>
+                Thông tin lịch hẹn
+              </h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <dl class="row">
+                    <dt class="col-sm-4">Bác sĩ:</dt>
+                    <dd class="col-sm-8">
+                      <strong><%= @appointment.veterinarian_name %></strong>
+                    </dd>
+
+                    <dt class="col-sm-4">Ngày giờ:</dt>
+                    <dd class="col-sm-8">
+                      <strong><%= format_datetime(@appointment.scheduled_at) %></strong>
+                    </dd>
+
+                    <dt class="col-sm-4">Loại:</dt>
+                    <dd class="col-sm-8">
+                      <span class="badge bg-info"><%= @appointment.display_type %></span>
+                    </dd>
+
+                    <dt class="col-sm-4">Trạng thái:</dt>
+                    <dd class="col-sm-8">
+                      <span class="<%= status_badge_class(@appointment.status) %>">
+                        <%= @appointment.display_status %>
+                      </span>
+                    </dd>
+                  </dl>
+                </div>
+                <div class="col-md-6">
+                  <dl class="row">
+                    <dt class="col-sm-4">Tạo lúc:</dt>
+                    <dd class="col-sm-8"><%= format_datetime(@appointment.created_at) %></dd>
+
+                    <dt class="col-sm-4">Cập nhật:</dt>
+                    <dd class="col-sm-8"><%= format_datetime(@appointment.updated_at) %></dd>
+                  </dl>
+                </div>
+              </div>
+
+              <% if @appointment.notes.present? %>
+                <hr>
+                <div class="row">
+                  <div class="col-12">
+                    <h6>Ghi chú:</h6>
+                    <p class="text-muted"><%= @appointment.notes %></p>
+                  </div>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <!-- Patient info -->
+          <div class="card shadow-sm mb-3">
+            <div class="card-header">
+              <h6 class="card-title mb-0">
+                <i class="bi bi-heart-pulse me-2"></i>
+                Thông tin bệnh nhân
+              </h6>
+            </div>
+            <div class="card-body">
+              <dl class="row mb-0">
+                <dt class="col-sm-4">Tên:</dt>
+                <dd class="col-sm-8"><%= @patient.name %></dd>
+
+                <dt class="col-sm-4">Loài:</dt>
+                <dd class="col-sm-8"><%= @patient.species %></dd>
+
+                <dt class="col-sm-4">Giống:</dt>
+                <dd class="col-sm-8"><%= @patient.breed %></dd>
+
+                <dt class="col-sm-4">Giới tính:</dt>
+                <dd class="col-sm-8"><%= gender_display(@patient.gender) %></dd>
+
+                <dt class="col-sm-4">Tuổi:</dt>
+                <dd class="col-sm-8"><%= @patient.age %> tuổi</dd>
+
+                <dt class="col-sm-4">Cân nặng:</dt>
+                <dd class="col-sm-8"><%= @patient.weight %> kg</dd>
+              </dl>
+            </div>
+          </div>
+
+          <!-- Owner info -->
+          <div class="card shadow-sm">
+            <div class="card-header">
+              <h6 class="card-title mb-0">
+                <i class="bi bi-person me-2"></i>
+                Thông tin chủ nuôi
+              </h6>
+            </div>
+            <div class="card-body">
+              <dl class="row mb-0">
+                <dt class="col-sm-4">Tên:</dt>
+                <dd class="col-sm-8"><%= @patient.owner.name %></dd>
+
+                <dt class="col-sm-4">Điện thoại:</dt>
+                <dd class="col-sm-8"><%= format_phone(@patient.owner.phone) %></dd>
+
+                <dt class="col-sm-4">Email:</dt>
+                <dd class="col-sm-8"><%= @patient.owner.email %></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action buttons -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <div class="card shadow-sm">
+            <div class="card-header">
+              <h6 class="card-title mb-0">
+                <i class="bi bi-gear me-2"></i>
+                Thao tác
+              </h6>
+            </div>
+            <div class="card-body">
+              <div class="btn-group" role="group">
+                <% if @appointment.status == "scheduled" %>
+                  <%= link_to start_owner_patient_appointment_path(@patient.owner, @patient, @appointment), 
+                      method: :patch, 
+                      class: "btn btn-success" do %>
+                    <i class="bi bi-play-circle me-2"></i>
+                    Bắt đầu khám
+                  <% end %>
+                <% end %>
+
+                <% if @appointment.status == "in_progress" %>
+                  <%= link_to complete_owner_patient_appointment_path(@patient.owner, @patient, @appointment), 
+                      method: :patch, 
+                      class: "btn btn-success" do %>
+                    <i class="bi bi-check-circle me-2"></i>
+                    Hoàn thành
+                  <% end %>
+                <% end %>
+
+                <% if ["scheduled", "in_progress"].include?(@appointment.status) %>
+                  <%= link_to cancel_owner_patient_appointment_path(@patient.owner, @patient, @appointment), 
+                      method: :patch, 
+                      data: { confirm: "Bạn có chắc chắn muốn hủy lịch hẹn này?" },
+                      class: "btn btn-warning" do %>
+                    <i class="bi bi-x-circle me-2"></i>
+                    Hủy lịch hẹn
+                  <% end %>
+                <% end %>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Navigation -->
+      <div class="mt-3">
+        <%= link_to owner_patient_appointments_path(@patient.owner, @patient), class: "btn btn-outline-secondary me-2" do %>
+          <i class="bi bi-arrow-left me-2"></i>
+          Quay lại danh sách
+        <% end %>
+        <%= link_to owner_patient_path(@patient.owner, @patient), class: "btn btn-outline-primary" do %>
+          <i class="bi bi-heart-pulse me-2"></i>
+          Xem bệnh nhân
+        <% end %>
+      </div>
+    </div>
+  </div>
+</div>

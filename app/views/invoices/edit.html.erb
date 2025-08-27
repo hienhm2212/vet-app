@@ -1,0 +1,130 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to 'Chủ nuôi', owners_path %></li>
+          <li class="breadcrumb-item"><%= link_to @appointment.patient.owner.name, owner_path(@appointment.patient.owner) %></li>
+          <li class="breadcrumb-item"><%= link_to 'Bệnh nhân', owner_patients_path(@appointment.patient.owner) %></li>
+          <li class="breadcrumb-item"><%= link_to @appointment.patient.name, owner_patient_path(@appointment.patient.owner, @appointment.patient) %></li>
+          <li class="breadcrumb-item"><%= link_to 'Lịch hẹn', owner_patient_appointments_path(@appointment.patient.owner, @appointment.patient) %></li>
+          <li class="breadcrumb-item"><%= link_to "Lịch hẹn ##{@appointment.id}", owner_patient_appointment_path(@appointment.patient.owner, @appointment.patient, @appointment) %></li>
+          <li class="breadcrumb-item"><%= link_to 'Hóa đơn', owner_patient_appointment_invoices_path(@appointment.patient.owner, @appointment.patient, @appointment) %></li>
+          <li class="breadcrumb-item"><%= link_to "Hóa đơn ##{@invoice.id}", owner_patient_appointment_invoice_path(@appointment.patient.owner, @appointment.patient, @appointment, @invoice) %></li>
+          <li class="breadcrumb-item active">Sửa</li>
+        </ol>
+      </nav>
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Sửa Hóa đơn #<%= @invoice.id %></h1>
+        <%= link_to 'Quay lại', owner_patient_appointment_invoice_path(@appointment.patient.owner, @appointment.patient, @appointment, @invoice), class: 'btn btn-secondary' %>
+      </div>
+
+      <!-- Invoice form -->
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Thông tin Hóa đơn</h5>
+        </div>
+        <div class="card-body">
+          <%= form_with model: [@appointment.patient.owner, @appointment.patient, @appointment, @invoice], local: true, class: "needs-validation", novalidate: true do |form| %>
+            <% if @invoice.errors.any? %>
+              <div class="alert alert-danger">
+                <h6><%= pluralize(@invoice.errors.count, "lỗi") %> đã xảy ra:</h6>
+                <ul class="mb-0">
+                  <% @invoice.errors.full_messages.each do |message| %>
+                    <li><%= message %></li>
+                  <% end %>
+                </ul>
+              </div>
+            <% end %>
+
+            <div class="row">
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <%= form.label :total_amount, "Tổng tiền", class: "form-label" %>
+                  <div class="input-group">
+                    <%= form.number_field :total_amount, class: "form-control #{'is-invalid' if @invoice.errors[:total_amount].any?}", step: 0.01, min: 0, placeholder: "0.00" %>
+                    <span class="input-group-text">₫</span>
+                  </div>
+                  <% if @invoice.errors[:total_amount].any? %>
+                    <div class="invalid-feedback">
+                      <%= @invoice.errors[:total_amount].join(', ') %>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+
+              <div class="col-md-6">
+                <div class="mb-3">
+                  <%= form.label :payment_status, "Trạng thái thanh toán", class: "form-label" %>
+                  <%= form.select :payment_status,
+                      options_for_select([
+                        ["Chưa thanh toán", "pending"],
+                        ["Đã thanh toán", "paid"],
+                        ["Đã hủy", "cancelled"]
+                      ], @invoice.payment_status),
+                      {},
+                      { class: "form-select #{'is-invalid' if @invoice.errors[:payment_status].any?}" } %>
+                  <% if @invoice.errors[:payment_status].any? %>
+                    <div class="invalid-feedback">
+                      <%= @invoice.errors[:payment_status].join(', ') %>
+                    </div>
+                  <% end %>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2">
+              <%= link_to 'Hủy', owner_patient_appointment_invoice_path(@appointment.patient.owner, @appointment.patient, @appointment, @invoice), class: 'btn btn-secondary' %>
+              <%= form.submit 'Cập nhật', class: 'btn btn-warning' %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+
+      <!-- Current invoice info -->
+      <div class="card shadow-sm mt-4">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Thông tin hiện tại</h5>
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <dl class="row">
+                <dt class="col-sm-4">ID Hóa đơn:</dt>
+                <dd class="col-sm-8"><strong>#<%= @invoice.id %></strong></dd>
+
+                <dt class="col-sm-4">Tổng tiền hiện tại:</dt>
+                <dd class="col-sm-8">
+                  <span class="fw-bold text-primary">
+                    <%= number_to_currency(@invoice.total_amount, unit: "₫", precision: 0, delimiter: ".") %>
+                  </span>
+                </dd>
+
+                <dt class="col-sm-4">Trạng thái hiện tại:</dt>
+                <dd class="col-sm-8">
+                  <span class="<%= status_badge_class(@invoice.payment_status) %>">
+                    <%= @invoice.payment_status == 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán' %>
+                  </span>
+                </dd>
+              </dl>
+            </div>
+            <div class="col-md-6">
+              <dl class="row">
+                <dt class="col-sm-4">Ngày tạo:</dt>
+                <dd class="col-sm-8"><%= format_datetime_vn(@invoice.created_at) %></dd>
+
+                <dt class="col-sm-4">Cập nhật lần cuối:</dt>
+                <dd class="col-sm-8"><%= format_datetime_vn(@invoice.updated_at) %></dd>
+
+                <dt class="col-sm-4">Số sản phẩm:</dt>
+                <dd class="col-sm-8"><%= @invoice.invoice_items.count %></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

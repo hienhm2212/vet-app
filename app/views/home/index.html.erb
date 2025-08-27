@@ -395,15 +395,23 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+function initDashboardCharts() {
+  const salesEl = document.getElementById('salesChart');
+  const appointmentsEl = document.getElementById('appointmentsChart');
+
+  if (!salesEl || !appointmentsEl || typeof Chart === 'undefined') { return; }
+
+  // Destroy existing charts if re-initialized by Turbo navigation
+  if (window.__salesChartInstance) { window.__salesChartInstance.destroy(); }
+  if (window.__appointmentsChartInstance) { window.__appointmentsChartInstance.destroy(); }
+
   // Sales Chart
-  const salesCtx = document.getElementById('salesChart').getContext('2d');
+  const salesCtx = salesEl.getContext('2d');
   const salesData = <%= raw @daily_sales.to_json %>;
-  
+
   const salesLabels = [];
   const salesValues = [];
-  
-  // Fill in missing dates with 0
+
   for (let i = 6; i >= 0; i--) {
     const date = new Date();
     date.setDate(date.getDate() - i);
@@ -411,8 +419,8 @@ document.addEventListener('DOMContentLoaded', function() {
     salesLabels.push(date.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit' }));
     salesValues.push(salesData[dateStr] || 0);
   }
-  
-  new Chart(salesCtx, {
+
+  window.__salesChartInstance = new Chart(salesCtx, {
     type: 'line',
     data: {
       labels: salesLabels,
@@ -429,9 +437,7 @@ document.addEventListener('DOMContentLoaded', function() {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          display: false
-        }
+        legend: { display: false }
       },
       scales: {
         y: {
@@ -451,34 +457,34 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Appointments Chart
-  const appointmentsCtx = document.getElementById('appointmentsChart').getContext('2d');
+  const appointmentsCtx = appointmentsEl.getContext('2d');
   const appointmentsData = <%= raw @appointments_by_status.to_json %>;
-  
+
   const statusLabels = {
     'scheduled': 'Chờ khám',
     'in_progress': 'Đang khám',
     'completed': 'Hoàn thành',
     'cancelled': 'Đã hủy'
   };
-  
+
   const statusColors = {
     'scheduled': '#0d6efd',
     'in_progress': '#ffc107',
     'completed': '#198754',
     'cancelled': '#6c757d'
   };
-  
+
   const labels = [];
   const data = [];
   const colors = [];
-  
+
   Object.keys(appointmentsData).forEach(status => {
     labels.push(statusLabels[status] || status);
     data.push(appointmentsData[status]);
     colors.push(statusColors[status] || '#6c757d');
   });
-  
-  new Chart(appointmentsCtx, {
+
+  window.__appointmentsChartInstance = new Chart(appointmentsCtx, {
     type: 'doughnut',
     data: {
       labels: labels,
@@ -492,11 +498,12 @@ document.addEventListener('DOMContentLoaded', function() {
       responsive: true,
       maintainAspectRatio: false,
       plugins: {
-        legend: {
-          position: 'bottom'
-        }
+        legend: { position: 'bottom' }
       }
     }
   });
-});
+}
+
+document.addEventListener('DOMContentLoaded', initDashboardCharts);
+document.addEventListener('turbo:load', initDashboardCharts);
 </script>

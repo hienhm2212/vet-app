@@ -1,0 +1,89 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to 'Chủ nuôi', owners_path %></li>
+          <li class="breadcrumb-item"><%= link_to @appointment.patient.owner.name, owner_path(@appointment.patient.owner) %></li>
+          <li class="breadcrumb-item"><%= link_to 'Bệnh nhân', owner_patients_path(@appointment.patient.owner) %></li>
+          <li class="breadcrumb-item"><%= link_to @appointment.patient.name, owner_patient_path(@appointment.patient.owner, @appointment.patient) %></li>
+          <li class="breadcrumb-item"><%= link_to 'Lịch hẹn', owner_patient_appointments_path(@appointment.patient.owner, @appointment.patient) %></li>
+          <li class="breadcrumb-item"><%= link_to "Lịch hẹn ##{@appointment.id}", owner_patient_appointment_path(@appointment.patient.owner, @appointment.patient, @appointment) %></li>
+          <li class="breadcrumb-item active">Hóa đơn</li>
+        </ol>
+      </nav>
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Hóa đơn cho Lịch hẹn #<%= @appointment.id %></h1>
+        <div class="btn-group" role="group">
+          <%= link_to 'Thêm hóa đơn mới', new_owner_patient_appointment_invoice_path(@appointment.patient.owner, @appointment.patient, @appointment), class: 'btn btn-success' %>
+          <%= link_to 'Quay lại', owner_patient_appointment_path(@appointment.patient.owner, @appointment.patient, @appointment), class: 'btn btn-secondary' %>
+        </div>
+      </div>
+
+      <!-- Invoices list -->
+      <div class="card shadow-sm">
+        <div class="card-header">
+          <h5 class="card-title mb-0">Danh sách Hóa đơn</h5>
+        </div>
+        <div class="card-body">
+          <% if @invoices.any? %>
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>ID</th>
+                    <th>Tổng tiền</th>
+                    <th>Trạng thái thanh toán</th>
+                    <th>Ngày tạo</th>
+                    <th>Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <% @invoices.each do |invoice| %>
+                    <tr>
+                      <td>
+                        <strong>#<%= invoice.id %></strong>
+                      </td>
+                      <td>
+                        <span class="fw-bold text-primary">
+                          <%= number_to_currency(invoice.total_amount, unit: "₫", precision: 0, delimiter: ".") %>
+                        </span>
+                      </td>
+                      <td>
+                        <span class="<%= status_badge_class(invoice.payment_status) %>">
+                          <%= invoice.payment_status == 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán' %>
+                        </span>
+                      </td>
+                      <td>
+                        <%= format_datetime_vn(invoice.created_at) %>
+                      </td>
+                      <td>
+                        <div class="btn-group btn-group-sm" role="group">
+                          <%= link_to 'Xem', owner_patient_appointment_invoice_path(@appointment.patient.owner, @appointment.patient, @appointment, invoice), class: 'btn btn-outline-primary' %>
+                          <%= link_to 'Sửa', edit_owner_patient_appointment_invoice_path(@appointment.patient.owner, @appointment.patient, @appointment, invoice), class: 'btn btn-outline-warning' %>
+                          <%= link_to 'Xóa', owner_patient_appointment_invoice_path(@appointment.patient.owner, @appointment.patient, @appointment, invoice), 
+                              method: :delete, 
+                              data: { confirm: 'Bạn có chắc chắn muốn xóa hóa đơn này?' }, 
+                              class: 'btn btn-outline-danger' %>
+                        </div>
+                      </td>
+                    </tr>
+                  <% end %>
+                </tbody>
+              </table>
+            </div>
+          <% else %>
+            <div class="text-center py-4">
+              <i class="bi bi-receipt text-muted" style="font-size: 3rem;"></i>
+              <h5 class="text-muted mt-3">Chưa có hóa đơn nào</h5>
+              <p class="text-muted">Tạo hóa đơn đầu tiên cho lịch hẹn này.</p>
+              <%= link_to 'Tạo hóa đơn mới', new_owner_patient_appointment_invoice_path(@appointment.patient.owner, @appointment.patient, @appointment), class: 'btn btn-success' %>
+            </div>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,215 @@
+<div class="container mt-4">
+  <div class="row">
+    <div class="col-12">
+      <!-- Breadcrumb -->
+      <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item"><%= link_to 'Chủ nuôi', owners_path %></li>
+          <li class="breadcrumb-item"><%= link_to @appointment.patient.owner.name, owner_path(@appointment.patient.owner) %></li>
+          <li class="breadcrumb-item"><%= link_to 'Bệnh nhân', owner_patients_path(@appointment.patient.owner) %></li>
+          <li class="breadcrumb-item"><%= link_to @appointment.patient.name, owner_patient_path(@appointment.patient.owner, @appointment.patient) %></li>
+          <li class="breadcrumb-item"><%= link_to 'Lịch hẹn', owner_patient_appointments_path(@appointment.patient.owner, @appointment.patient) %></li>
+          <li class="breadcrumb-item"><%= link_to "Lịch hẹn ##{@appointment.id}", owner_patient_appointment_path(@appointment.patient.owner, @appointment.patient, @appointment) %></li>
+          <li class="breadcrumb-item"><%= link_to 'Hóa đơn', owner_patient_appointment_invoices_path(@appointment.patient.owner, @appointment.patient, @appointment) %></li>
+          <li class="breadcrumb-item active">Hóa đơn #<%= @invoice.id %></li>
+        </ol>
+      </nav>
+
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Hóa đơn #<%= @invoice.id %></h1>
+        <div class="btn-group" role="group">
+          <%= link_to 'Sửa', edit_owner_patient_appointment_invoice_path(@appointment.patient.owner, @appointment.patient, @appointment, @invoice), class: 'btn btn-warning' %>
+          <%= link_to 'Quay lại', owner_patient_appointment_invoices_path(@appointment.patient.owner, @appointment.patient, @appointment), class: 'btn btn-secondary' %>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-8">
+          <!-- Invoice details -->
+          <div class="card shadow-sm mb-4">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Thông tin Hóa đơn</h5>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-6">
+                  <dl class="row">
+                    <dt class="col-sm-4">ID Hóa đơn:</dt>
+                    <dd class="col-sm-8"><strong>#<%= @invoice.id %></strong></dd>
+
+                    <dt class="col-sm-4">Tổng tiền:</dt>
+                    <dd class="col-sm-8">
+                      <span class="fw-bold text-primary fs-5">
+                        <%= number_to_currency(@invoice.total_amount, unit: "₫", precision: 0, delimiter: ".") %>
+                      </span>
+                    </dd>
+
+                    <dt class="col-sm-4">Trạng thái:</dt>
+                    <dd class="col-sm-8">
+                      <span class="<%= status_badge_class(@invoice.payment_status) %>">
+                        <%= @invoice.payment_status == 'paid' ? 'Đã thanh toán' : 'Chưa thanh toán' %>
+                      </span>
+                    </dd>
+                  </dl>
+                </div>
+                <div class="col-md-6">
+                  <dl class="row">
+                    <dt class="col-sm-4">Ngày tạo:</dt>
+                    <dd class="col-sm-8"><%= format_datetime_vn(@invoice.created_at) %></dd>
+
+                    <dt class="col-sm-4">Cập nhật:</dt>
+                    <dd class="col-sm-8"><%= format_datetime_vn(@invoice.updated_at) %></dd>
+
+                    <dt class="col-sm-4">Số sản phẩm:</dt>
+                    <dd class="col-sm-8"><%= @invoice.invoice_items.count %></dd>
+                  </dl>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Products list -->
+          <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="card-title mb-0">Danh sách Sản phẩm</h5>
+              <button type="button" class="btn btn-success btn-sm" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                <i class="bi bi-plus-circle"></i> Thêm sản phẩm
+              </button>
+            </div>
+            <div class="card-body">
+              <% if @invoice.invoice_items.any? %>
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Sản phẩm</th>
+                        <th>Số lượng</th>
+                        <th>Đơn giá</th>
+                        <th>Thành tiền</th>
+                        <th>Thao tác</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <% @invoice.invoice_items.includes(:product).each do |item| %>
+                        <tr>
+                          <td>
+                            <div>
+                              <strong><%= item.product.name %></strong>
+                              <br>
+                              <small class="text-muted">
+                                <%= item.product.category %> • <%= item.product.product_type %>
+                              </small>
+                            </div>
+                          </td>
+                          <td><%= item.quantity %></td>
+                          <td><%= number_to_currency(item.price, unit: "₫", precision: 0, delimiter: ".") %></td>
+                          <td>
+                            <strong class="text-primary">
+                              <%= number_to_currency(item.price * item.quantity, unit: "₫", precision: 0, delimiter: ".") %>
+                            </strong>
+                          </td>
+                          <td>
+                            <%= link_to 'Xóa', remove_product_owner_patient_appointment_invoice_path(@appointment.patient.owner, @appointment.patient, @appointment, @invoice, product_id: item.product_id),
+                                method: :delete,
+                                data: { confirm: 'Bạn có chắc chắn muốn xóa sản phẩm này?' },
+                                class: 'btn btn-outline-danger btn-sm' %>
+                          </td>
+                        </tr>
+                      <% end %>
+                    </tbody>
+                  </table>
+                </div>
+              <% else %>
+                <div class="text-center py-4">
+                  <i class="bi bi-cart text-muted" style="font-size: 3rem;"></i>
+                  <h5 class="text-muted mt-3">Chưa có sản phẩm nào</h5>
+                  <p class="text-muted">Thêm sản phẩm vào hóa đơn.</p>
+                  <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addProductModal">
+                    <i class="bi bi-plus-circle"></i> Thêm sản phẩm đầu tiên
+                  </button>
+                </div>
+              <% end %>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
+          <!-- Actions -->
+          <div class="card shadow-sm mb-4">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Thao tác</h5>
+            </div>
+            <div class="card-body">
+              <div class="d-grid gap-2">
+                <% unless @invoice.payment_status == 'paid' %>
+                  <%= link_to 'Đánh dấu đã thanh toán', mark_as_paid_owner_patient_appointment_invoice_path(@appointment.patient.owner, @appointment.patient, @appointment, @invoice),
+                      method: :patch,
+                      class: 'btn btn-success' %>
+                <% end %>
+
+                <% unless @invoice.payment_status == 'cancelled' %>
+                  <%= link_to 'Hủy hóa đơn', mark_as_cancelled_owner_patient_appointment_invoice_path(@appointment.patient.owner, @appointment.patient, @appointment, @invoice),
+                      method: :patch,
+                      data: { confirm: 'Bạn có chắc chắn muốn hủy hóa đơn này?' },
+                      class: 'btn btn-danger' %>
+                <% end %>
+
+                <%= link_to 'In hóa đơn', '#', class: 'btn btn-outline-primary' %>
+              </div>
+            </div>
+          </div>
+
+          <!-- Patient info -->
+          <div class="card shadow-sm">
+            <div class="card-header">
+              <h5 class="card-title mb-0">Thông tin Bệnh nhân</h5>
+            </div>
+            <div class="card-body">
+              <dl class="row">
+                <dt class="col-sm-4">Tên:</dt>
+                <dd class="col-sm-8"><%= @appointment.patient.name %></dd>
+
+                <dt class="col-sm-4">Loài:</dt>
+                <dd class="col-sm-8"><%= @appointment.patient.species %></dd>
+
+                <dt class="col-sm-4">Chủ nuôi:</dt>
+                <dd class="col-sm-8"><%= @appointment.patient.owner.name %></dd>
+
+                <dt class="col-sm-4">Bác sĩ:</dt>
+                <dd class="col-sm-8"><%= @appointment.veterinarian_name %></dd>
+              </dl>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add Product Modal -->
+<div class="modal fade" id="addProductModal" tabindex="-1" aria-labelledby="addProductModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="addProductModalLabel">Thêm sản phẩm bằng mã vạch</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <%= form_with url: add_product_by_barcode_owner_patient_appointment_invoice_path(@appointment.patient.owner, @appointment.patient, @appointment, @invoice), method: :post, local: true do |form| %>
+        <div class="modal-body">
+          <div class="mb-3">
+            <%= form.label :barcode, "Mã vạch sản phẩm", class: "form-label" %>
+            <%= form.text_field :barcode, class: "form-control", required: true, placeholder: "Quét hoặc nhập mã vạch", autofocus: true %>
+          </div>
+          <div class="mb-3">
+            <%= form.label :quantity, "Số lượng", class: "form-label" %>
+            <%= form.number_field :quantity, class: "form-control", value: 1, min: 1, required: true %>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+          <%= form.submit 'Thêm sản phẩm', class: 'btn btn-success' %>
+        </div>
+      <% end %>
+    </div>
+  </div>
+</div>
