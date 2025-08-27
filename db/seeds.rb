@@ -90,7 +90,7 @@ end
 
 # Add products to invoice using barcode
 puts "Adding products to invoice..."
-invoice = appointment.invoice
+invoice = appointment.invoices.create!(total_amount: 0, payment_status: "pending")
 product = Product.find_by(barcode: "VN1234567890") # Royal Canin food
 invoice.add_product(product, 2) if product
 
