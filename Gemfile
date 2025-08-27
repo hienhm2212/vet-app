@@ -10,7 +10,7 @@ gem "sqlite3", ">= 2.1"
 gem "pg", ">= 1.1"
 
 # Barcode generation
-gem "barby", "~> 0.6.8"
+gem "barby", "~> 0.7.0"
 gem "chunky_png", "~> 1.4"
 
 # Use the Puma web server [https://github.com/puma/puma]
