@@ -30,15 +30,6 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y sqlite3 libsqlite3-dev
 
-    - name: Install Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '18'
-        cache: 'npm'
-
-    - name: Install JavaScript dependencies
-      run: npm ci
-
     - name: Setup database
       run: |
         bundle exec rails db:create
@@ -86,10 +77,6 @@ jobs:
 
     - name: Run Bundle Audit
       run: bundle exec bundle-audit check --update
-
-    - name: Run Yarn Audit
-      run: yarn audit --level moderate
-      continue-on-error: true
 
     - name: Run Brakeman Security Scan
       run: bundle exec brakeman --no-progress --output-format json --output brakeman-report.json
