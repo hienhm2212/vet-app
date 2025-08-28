@@ -128,12 +128,14 @@ jobs:
 
     - name: Create deployment package
       run: |
-        tar -czf vet-app-$(date +%Y%m%d-%H%M%S).tar.gz \
+        DEPLOYMENT_FILE="vet-app-$(date +%Y%m%d-%H%M%S).tar.gz"
+        tar -czf "$DEPLOYMENT_FILE" \
           --exclude='.git' \
           --exclude='node_modules' \
           --exclude='tmp' \
           --exclude='log' \
           --exclude='coverage' \
+          --exclude='*.tar.gz' \
           .
 
     - name: Upload build artifacts
